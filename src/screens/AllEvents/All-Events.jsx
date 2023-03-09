@@ -23,8 +23,8 @@ const AllEvents = () => {
 
   const [allEvents, setAllEvents] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [startDate, setStartDate] = useState(moment());
-  const [endDate, setEndDate] = useState(moment());
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   const events = useSelector((state) => state.admin.events);
 
@@ -42,17 +42,19 @@ const AllEvents = () => {
   }, [events]);
 
   const onSubmit = () => {
-    const res = events.filter((event) => {
-      if (
-        moment(event?.eventDate).isBetween(
-          moment(startDate).format("YYYY-DD-MM"),
-          moment(endDate).format("YYYY-DD-MM")
-        )
-      ) {
-        return event;
-      }
-    });
-    console.log("events", events);
+    const res = events.filter(
+      (e) =>
+        (moment(e?.eventDate).isBetween(moment(startDate), moment(endDate)) ||
+          moment(e?.eventDate).isSame(moment(startDate)) ||
+          moment(e?.eventDate).isSame(moment(endDate))) &&
+        e
+    );
+
+    // {
+    //   if (moment(e?.eventDate).isBetween(moment(startDate), moment(endDate))) {
+    //     return e;
+    //   }
+    // });
     setAllEvents(res);
   };
 
@@ -111,13 +113,11 @@ const AllEvents = () => {
         animationInTiming={1000}
         animationOutTiming={300}
         isVisible={modalVisible}
-        // coverScreen
         onRequestClose={() => {
           setModalVisible(!modalVisible);
         }}
         customBackdrop={<View style={{ flex: 1 }} />}
       >
-        {/* <View style={styles.overlay} /> */}
         <TouchableOpacity
           style={{
             // flex: 1,
@@ -139,12 +139,13 @@ const AllEvents = () => {
             </Text>
             <View style={{ marginTop: 20 }}>
               <Text style={styles.text}>Start Date :</Text>
+
               <DatePicker
                 style={styles.datePickerStyle}
                 date={startDate}
                 mode="date"
                 placeholder="select date"
-                format="DD/MM/YYYY"
+                format="YYYY-MM-DD"
                 confirmBtnText="Confirm"
                 cancelBtnText="Cancel"
                 customStyles={{
@@ -178,7 +179,8 @@ const AllEvents = () => {
                 date={endDate}
                 mode="date"
                 placeholder="select date"
-                format="DD/MM/YYYY"
+                format="YYYY-MM-DD"
+                minDate={startDate}
                 confirmBtnText="Confirm"
                 cancelBtnText="Cancel"
                 customStyles={{
