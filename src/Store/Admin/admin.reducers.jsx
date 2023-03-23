@@ -10,12 +10,11 @@ import {
 export const AdminReducer = (state = {}, action) => {
   switch (action.type) {
     case UPDATE_SUCCESS:
-      return { success: false };
+      return { ...state, success: false };
 
     case ONGOING_EVENTS_SUCCESS:
       return {
         ...state,
-        success: true,
         onGoingEvents: action.payload,
       };
 
@@ -27,6 +26,7 @@ export const AdminReducer = (state = {}, action) => {
     case EVENT_DETAIL_SUCCESS:
       return {
         ...state,
+        success: true,
         event: action.payload,
       };
 

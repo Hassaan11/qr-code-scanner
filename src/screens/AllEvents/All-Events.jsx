@@ -9,15 +9,16 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import DatePicker from "react-native-datepicker";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllEvents } from "../../Store/Admin/admin.action";
+import { getAllEvents, updateSuccess } from "../../Store/Admin/admin.action";
 import SearchEvents from "../../components/Search-bar/Search-bar";
 import EventCard from "../../components/Event-card/EventCard";
 import moment from "moment";
 import FontAwesomeIcon from "react-native-vector-icons/Ionicons";
 
 const AllEvents = () => {
+  const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -40,6 +41,13 @@ const AllEvents = () => {
   useEffect(() => {
     setAllEvents(events);
   }, [events]);
+
+  useEffect(() => {
+    return () => {
+      // Your cleanup code to be executed when the screen is unfocused
+      dispatch(updateSuccess());
+    };
+  }, [isFocused]);
 
   const onSubmit = () => {
     const res = events.filter(
@@ -93,6 +101,7 @@ const AllEvents = () => {
                 onPress={() =>
                   navigation.navigate("Details", {
                     eventId: event.id,
+                    showScan: false,
                   })
                 }
               >

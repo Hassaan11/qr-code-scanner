@@ -1,4 +1,3 @@
-import axios from "axios";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
@@ -6,12 +5,14 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector, useDispatch } from "react-redux";
 import { getEventDetail } from "../../Store/Admin/admin.action";
 import FontAwesomeIcon from "react-native-vector-icons/MaterialIcons";
+import { ActivityIndicator } from "react-native-paper";
 
 const Details = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const { eventId } = route.params;
+  const { eventId, showScan } = route.params;
 
   const eventDetail = useSelector((state) => state.admin.event);
+  const success = useSelector((state) => state.admin.success);
 
   useEffect(() => {
     dispatch(getEventDetail(eventId));
@@ -19,76 +20,86 @@ const Details = ({ route, navigation }) => {
 
   return (
     <>
-      <View style={styles.nav}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" color="black" size={20} />
-        </TouchableOpacity>
-        <Text style={styles.heading}>Events Description</Text>
-      </View>
+      {!success ? (
+        <ActivityIndicator style={{ top: "50%" }} />
+      ) : (
+        <>
+          <View style={styles.nav}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" color="black" size={20} />
+            </TouchableOpacity>
+            <Text style={styles.heading}>Events Description</Text>
+          </View>
 
-      <View style={styles.view}>
-        <View
-          style={{
-            position: "absolute",
-            left: "50%",
-            right: "50%",
-            top: "-4%",
-            backgroundColor: "#1eae63",
-            borderRadius: 12,
-            width: 60,
-            height: 60,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <FontAwesomeIcon name="event" color="white" size={40} />
-        </View>
-        <View>
-          <View style={{ marginTop: 30 }}>
-            <Text style={styles.title}>{eventDetail?.title}</Text>
-            <Text style={styles.venue}>{eventDetail?.venue}</Text>
-            <Text style={[styles.venue, { color: "#1eae63" }]}>
-              {moment(eventDetail?.eventDate).format("MMM")}{" "}
-              {moment(eventDetail?.eventDate).date()}
-              {", "}
-              {moment(eventDetail?.eventStartTime, "HH:mm:ss").format(
-                "hh:mm A"
-              )}
-              {" - "}
-              {moment(eventDetail?.eventEndTime, "HH:mm:ss").format("hh:mm A")}
-            </Text>
+          <View style={styles.view}>
+            <View
+              style={{
+                position: "absolute",
+                left: "50%",
+                right: "50%",
+                top: "-4%",
+                backgroundColor: "#1eae63",
+                borderRadius: 12,
+                width: 60,
+                height: 60,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <FontAwesomeIcon name="event" color="white" size={40} />
+            </View>
+            <View>
+              <View style={{ marginTop: 30 }}>
+                <Text style={styles.title}>{eventDetail?.title}</Text>
+                <Text style={styles.venue}>{eventDetail?.venue}</Text>
+                <Text style={[styles.venue, { color: "#1eae63" }]}>
+                  {moment(eventDetail?.eventDate).format("MMM")}{" "}
+                  {moment(eventDetail?.eventDate).date()}
+                  {", "}
+                  {moment(eventDetail?.eventStartTime, "HH:mm:ss").format(
+                    "hh:mm A"
+                  )}
+                  {" - "}
+                  {moment(eventDetail?.eventEndTime, "HH:mm:ss").format(
+                    "hh:mm A"
+                  )}
+                </Text>
+              </View>
+              <View
+                style={{
+                  marginVertical: 15,
+                  borderBottomColor: "lightgray",
+                  borderBottomWidth: 0.5,
+                }}
+              />
+              <View style={{ marginTop: 5 }}>
+                <Text style={styles.text}>{eventDetail?.description}</Text>
+              </View>
+            </View>
+            {showScan && (
+              <View style={styles.btn}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#1eae63",
+                    width: "100%",
+                    borderRadius: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 10,
+                  }}
+                  onPress={() =>
+                    navigation.navigate("qr", {
+                      eventId: eventDetail?.id,
+                    })
+                  }
+                >
+                  <Text style={styles.qrText}>Scan Qr Code</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-          <View
-            style={{
-              marginVertical: 15,
-              borderBottomColor: "lightgray",
-              borderBottomWidth: 0.5,
-            }}
-          />
-          <View style={{ marginTop: 5 }}>
-            <Text style={styles.text}>{eventDetail?.description}</Text>
-          </View>
-        </View>
-        <View style={styles.btn}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#1eae63",
-              width: "100%",
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 10,
-            }}
-            onPress={() =>
-              navigation.navigate("qr", {
-                eventId: eventDetail?.id,
-              })
-            }
-          >
-            <Text style={styles.qrText}>Scan Qr Code</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        </>
+      )}
     </>
   );
 };

@@ -1,33 +1,23 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  ScrollView,
-  Text,
-  StyleSheet,
-  View,
-  TouchableOpacity,
-} from "react-native";
-import Card from "../../components/Card/Card";
+import { ScrollView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { getOngoingEvents } from "../../Store/Admin/admin.action";
+import {
+  getOngoingEvents,
+  updateSuccess,
+} from "../../Store/Admin/admin.action";
 import { useDispatch, useSelector } from "react-redux";
 import SearchEvents from "../../components/Search-bar/Search-bar";
 import OngoignEventsCard from "../../components/OngoingEvent/OngoingEvent";
+import { useIsFocused } from "@react-navigation/native";
 
 const Events = () => {
+  const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [allEvents, setAllEvents] = useState([]);
 
   const events = useSelector((state) => state.admin.onGoingEvents);
 
-  // "http://10.10.4.26:5000/api/admin/eventshappeningnow";
-  // const getAllEvent = async () => {
-  //   const { data } = await axios.get(
-  //     "http://10.10.4.26:5000/api/admin/eventshappeningnow"
-  //   );
-  //   setEvents(data);
-  // };
   useEffect(() => {
     dispatch(getOngoingEvents());
   }, []);
@@ -35,6 +25,13 @@ const Events = () => {
   useEffect(() => {
     setAllEvents(events);
   }, [events]);
+
+  useEffect(() => {
+    return () => {
+      // Your cleanup code to be executed when the screen is unfocused
+      dispatch(updateSuccess());
+    };
+  }, [isFocused]);
 
   return (
     <>
@@ -53,6 +50,7 @@ const Events = () => {
                 onPress={() =>
                   navigation.navigate("Details", {
                     eventId: event.id,
+                    showScan: true,
                   })
                 }
               >

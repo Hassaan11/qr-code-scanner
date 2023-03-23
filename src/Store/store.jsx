@@ -4,11 +4,7 @@ import thunk from "redux-thunk";
 import { AdminReducer, loginGoogleReducer } from "./Admin/admin.reducers";
 
 const initialState = {
-  // login: {
-  //   userInfo: localStorage.getItem("userInfo")
-  //     ? JSON.parse(localStorage.getItem("userInfo"))
-  //     : null,
-  // },
+  admin: { success: false },
 };
 
 const reducer = combineReducers({
