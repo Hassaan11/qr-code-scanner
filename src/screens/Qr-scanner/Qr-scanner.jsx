@@ -59,7 +59,7 @@ export default function QrScanner({ route, navigation }) {
       <View style={{ flex: 1, justifyContent: "space-between" }}>
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          style={{ height: "90%", width: "100%" }}
+          style={{ height: "85%", width: "100%" }}
         />
         {/* {scanned && ( */}
         <View style={styles.btn}>
