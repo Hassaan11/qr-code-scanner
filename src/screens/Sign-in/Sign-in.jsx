@@ -3,10 +3,18 @@ import { Text, StyleSheet, View, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as AuthSession from "expo-auth-session";
+import {
+  ANDROID_CLIENT_ID,
+  IOS_CLIENT_ID,
+  EXPO_CLIENT_ID,
+  EXPO_CLIENT_SECRET,
+  REDIRECT_URI,
+} from "@env";
 
 import images from "../../../assets/index";
 import { useDispatch } from "react-redux";
-import { loginGoogle } from "../../Store/Admin/admin.action";
+import { googleLogin, setTokens } from "../../Store/Admin/admin.action";
 
 const Login = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -14,27 +22,81 @@ const Login = ({ navigation }) => {
   const [userInfo, setUserInfo] = useState();
   const [auth, setAuth] = useState();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId:
-      "162519831332-1du4g5et7km5t3sunoqrl75tkk550s65.apps.googleusercontent.com",
-    iodClientId:
-      "162519831332-d1rnthfciep6mt78csser9j8rhlip6lp.apps.googleusercontent.com",
-    expoClientId:
-      "162519831332-rpg5kadrv36r0hvuhmjlhgg9lc7hjg02.apps.googleusercontent.com",
-  });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    {
+      androidClientId: ANDROID_CLIENT_ID,
+      iodClientId: IOS_CLIENT_ID,
+      expoClientId: EXPO_CLIENT_ID,
+      scopes: [
+        "profile",
+        "email",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "openid",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar",
+      ],
+      responseType: "code",
+      shouldAutoExchangeCode: false,
+      extraParams: {
+        access_type: "offline",
+      },
+      prompt: "consent",
+    },
+    {
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v1/auth",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+    }
+  );
 
   useEffect(() => {
     if (response?.type == "success") {
-      setAccessToken(response.authentication.accessToken);
-      dispatch(loginGoogle(response.authentication));
-      getUserData();
-      const persistAuth = async () => {
-        await AsyncStorage.setItem(
-          "auth",
-          JSON.stringify(response.authentication)
-        );
+      console.log("response", response);
+      console.log("request", request);
+      // dispatch(loginCode(response.params.code, request.codeVerifier));
+      const getTokens = async () => {
+        const accessToken = new AuthSession.AccessTokenRequest({
+          clientId: EXPO_CLIENT_ID,
+          clientSecret: EXPO_CLIENT_SECRET,
+          code: response.params.code,
+          responseType: "token",
+          grantType: "implicit",
+          redirectUri: REDIRECT_URI,
+          scopes: [
+            "profile",
+            "email",
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "openid",
+            "https://www.googleapis.com/auth/calendar.events",
+            "https://www.googleapis.com/auth/calendar.readonly",
+            "https://www.googleapis.com/auth/calendar",
+          ],
+          extraParams: { code_verifier: request.codeVerifier },
+        });
+
+        console.log("accessToken", accessToken);
+
+        const exchangeCode = async () => {
+          return await AuthSession.exchangeCodeAsync(accessToken, {
+            tokenEndpoint: "https://oauth2.googleapis.com/token",
+          });
+        };
+        const tokens = await exchangeCode();
+        console.log("tokens", tokens.accessToken);
+        dispatch(setTokens(tokens));
+        setAccessToken(tokens);
+        setAuth(tokens);
+        // setAccessToken(response.authentication.accessToken);
+        // dispatch(loginGoogle(response.authentication));
+        getUserData(tokens);
+        const persistAuth = async () => {
+          await AsyncStorage.setItem("auth", JSON.stringify(tokens));
+        };
+        await persistAuth();
       };
-      persistAuth();
+      getTokens();
     }
   }, [response]);
 
@@ -50,17 +112,22 @@ const Login = ({ navigation }) => {
     getPersistedAuth();
   }, []);
 
-  const getUserData = async () => {
-    console.log("getUserData");
+  const getUserData = async (tokens) => {
     let userInfoResponse = await fetch(
       "https://www.googleapis.com/userinfo/v2/me",
       {
-        headers: { Authorization: `Bearer ${auth?.accessToken}` },
+        headers: {
+          Authorization: `Bearer ${
+            auth ? auth?.accessToken : tokens.accessToken
+          }`,
+        },
       }
     );
 
     userInfoResponse.json().then((data) => {
+      console.log("data", data);
       setUserInfo(data);
+      dispatch(googleLogin(data, tokens));
       // navigation.navigate("home");
     });
   };

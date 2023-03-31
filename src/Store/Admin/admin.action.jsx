@@ -6,22 +6,32 @@ import {
   EVENT_DETAIL_SUCCESS,
   ONGOING_EVENTS_SUCCESS,
   UPDATE_SUCCESS,
+  TOKEN_SUCCESS,
 } from "./admin.constants";
 
-const API_URL = "http://147.34.14.121:5000";
+const API_URL = "http://10.10.4.26:5000";
+// const API_URL = "http://192.168.100.14:5000";
+
+// 192.168.100.14
 
 axios.defaults.withCredentials = true;
 
-export const loginCode = (response, codeVerifier) => async (dispatch) => {
+export const setTokens = (tokens) => async (dispatch) => {
   try {
-    const { data } = await axios.post(
-      "http://10.10.4.26:5000/api/admin/auth/token/expo",
-      {
-        response: response,
-        codeVerifier: codeVerifier,
-      }
-    );
+    dispatch({ type: TOKEN_SUCCESS, payload: tokens });
+  } catch (error) {
+    console.log("loginGoogle", error);
+  }
+};
+
+export const googleLogin = (userInfo, tokens) => async (dispatch) => {
+  try {
+    const { data } = await axios.post(`${API_URL}/api/admin/auth/expo`, {
+      data: userInfo,
+      tokens: tokens,
+    });
     dispatch({ type: SIGNIN_SUCCESS, payload: data });
+    // navigation.navigate("home");
   } catch (error) {
     console.log("loginGoogle", error);
   }
@@ -36,8 +46,6 @@ export const loginGoogle = (response) => async (dispatch) => {
     //   }
     // );
     dispatch({ type: SIGNIN_SUCCESS, payload: response });
-
-    // localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
     console.log("loginGoogle", error);
   }
@@ -61,9 +69,22 @@ export const getOngoingEvents = () => async (dispatch) => {
   }
 };
 
-export const getEventDetail = (id) => async (dispatch) => {
+export const getEventDetail = (id) => async (dispatch, getState) => {
+  const {
+    login: { auth, tokens },
+  } = getState();
   try {
-    const { data } = await axios.get(`${API_URL}/api/admin/event/${id}`);
+    const { data } = await axios.post(
+      `${API_URL}/api/admin/expo/event/${id}`,
+      {
+        refreshToken: tokens.refreshToken,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${auth.user.token}`,
+        },
+      }
+    );
     dispatch({ type: EVENT_DETAIL_SUCCESS, payload: data });
   } catch (error) {
     console.log("getEventDetail", error);
@@ -71,7 +92,6 @@ export const getEventDetail = (id) => async (dispatch) => {
 };
 
 export const signout = () => (dispatch) => {
-  // localStorage.clear();
   dispatch({ type: SIGNOUT });
 };
 

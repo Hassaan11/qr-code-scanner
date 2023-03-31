@@ -5,6 +5,7 @@ import {
   EVENT_DETAIL_SUCCESS,
   ONGOING_EVENTS_SUCCESS,
   UPDATE_SUCCESS,
+  TOKEN_SUCCESS,
 } from "./admin.constants";
 
 export const AdminReducer = (state = {}, action) => {
@@ -42,6 +43,11 @@ export const loginGoogleReducer = (state = {}, action) => {
         loading: false,
         ...state,
         auth: action.payload,
+      };
+    case TOKEN_SUCCESS:
+      return {
+        ...state,
+        tokens: action.payload,
       };
     case SIGNOUT:
       return { ...state, auth: null };
