@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "#FFFFFF",
 
-    borderRadius: "25%",
+    borderRadius: 20,
 
     padding: 30,
     shadowOffset: {

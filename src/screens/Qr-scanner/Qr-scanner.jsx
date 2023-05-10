@@ -22,8 +22,8 @@ export default function QrScanner({ route, navigation }) {
     setScanned(true);
     let res = data?.split(" ");
     axios
-      .post(`http://10.10.4.26:5000/api/admin/scanqr`, {
-        // .post(`http://192.168.38.43:5000/api/admin/scanqr`, {
+      // .post(`http://10.10.5.151:5000/api/admin/scanqr`, {
+      .post(`http://192.168.100.14:5000/api/admin/scanqr`, {
         email: res?.[0],
         eventId: res?.[1],
         id: eventId,

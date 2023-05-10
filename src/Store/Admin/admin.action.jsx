@@ -7,10 +7,11 @@ import {
   ONGOING_EVENTS_SUCCESS,
   UPDATE_SUCCESS,
   TOKEN_SUCCESS,
+  SCAN_QR,
 } from "./admin.constants";
 
-const API_URL = "http://10.10.4.26:5000";
-// const API_URL = "http://192.168.100.14:5000";
+// const API_URL = "http://10.10.5.151:5000";
+const API_URL = "http://192.168.100.14:5000";
 
 // 192.168.100.14
 
@@ -88,6 +89,31 @@ export const getEventDetail = (id) => async (dispatch, getState) => {
     dispatch({ type: EVENT_DETAIL_SUCCESS, payload: data });
   } catch (error) {
     console.log("getEventDetail", error);
+  }
+};
+
+export const scanQR = (res, eventId) => async (dispatch, getState) => {
+  try {
+    const { data } = await axios
+      .post(`${API_URL}/api/admin/scanqr`, {
+        email: res?.[0],
+        eventId: res?.[1],
+        id: eventId,
+      })
+      .then((d) => {
+        alert("Qrcode Scanned Successfully");
+      })
+      .catch((err) => {
+        if (err.message.includes(401)) {
+          alert("QR Code is Already Scanned");
+        }
+        if (err.message.includes(404)) {
+          alert("You are not invited to this event");
+        }
+      });
+    dispatch({ type: SCAN_QR, payload: data });
+  } catch (error) {
+    console.log("scanQR", error);
   }
 };
 

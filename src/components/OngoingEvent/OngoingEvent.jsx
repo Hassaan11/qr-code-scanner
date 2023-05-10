@@ -16,8 +16,8 @@ const OngoignEventsCard = ({ event }) => {
 
           paddingHorizontal: 30,
           paddingVertical: 20,
-          borderBottomRightRadius: "25%",
-          borderBottomLeftRadius: "25%",
+          borderBottomRightRadius: 20,
+          borderBottomLeftRadius: 20,
         }}
       >
         <Text
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "#FFFFFF",
 
-    borderRadius: "25%",
+    borderRadius: 20,
 
     // padding: 30,
     shadowOffset: {

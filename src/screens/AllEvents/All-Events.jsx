@@ -44,7 +44,6 @@ const AllEvents = () => {
 
   useEffect(() => {
     return () => {
-      // Your cleanup code to be executed when the screen is unfocused
       dispatch(updateSuccess());
     };
   }, [isFocused]);
@@ -57,13 +56,11 @@ const AllEvents = () => {
           moment(e?.eventDate).isSame(moment(endDate))) &&
         e
     );
-
-    // {
-    //   if (moment(e?.eventDate).isBetween(moment(startDate), moment(endDate))) {
-    //     return e;
-    //   }
-    // });
     setAllEvents(res);
+  };
+
+  const clear = () => {
+    setAllEvents(events);
   };
 
   return (
@@ -230,6 +227,20 @@ const AllEvents = () => {
                 onPress={onSubmit}
               >
                 <Text style={{ color: "white" }}>Submit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  marginTop: 20,
+                  backgroundColor: "#1eae63",
+                  borderRadius: 8,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: 30,
+                }}
+                onPress={clear}
+              >
+                <Text style={{ color: "white" }}>Clear Filter</Text>
               </TouchableOpacity>
             </View>
           </View>
